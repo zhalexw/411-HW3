@@ -27,6 +27,10 @@ class Meal:
 
 
 def create_meal(meal: str, cuisine: str, price: float, difficulty: str) -> None:
+    ##Creates a meal given its name, cuisine type ,price and difficulty and adds that meal w/ all its parameters into the database if it is valid
+    ##Returns: None
+    ##Raises: 1.Value error if price is negative 2.Value error if dificulty is not LOW, MED, or HIGH 3.Value error if there is a duplicate meal name 
+    ## Logs: error if there is a duplicate meal name
     if not isinstance(price, (int, float)) or price <= 0:
         raise ValueError(f"Invalid price: {price}. Price must be a positive number.")
     if difficulty not in ['LOW', 'MED', 'HIGH']:
@@ -53,6 +57,10 @@ def create_meal(meal: str, cuisine: str, price: float, difficulty: str) -> None:
 
 
 def delete_meal(meal_id: int) -> None:
+    ##Deletes a meal from database given its meal id
+    ##Returns: None 
+    ##Raises: 1.Value Error if meal with meal id has already been deleted from database 2.Value error if meal with meal id not found 3. exception e if there is a database error
+    ##Logs: error if there is database error
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -76,6 +84,12 @@ def delete_meal(meal_id: int) -> None:
         raise e
 
 def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
+
+    ##gets the leaderboard and sorts them by wins
+    # Returns: A dictionairy
+    # Raises: 1. Value error if the sort by parameter is invalid 2. exception e if there is a database error
+    # Logs: 1. Error if there is an invalid sort by parameter 2. Error if there is a database error
+
     query = """
         SELECT id, meal, cuisine, price, difficulty, battles, wins, (wins * 1.0 / battles) AS win_pct
         FROM meals WHERE deleted = false AND battles > 0
@@ -117,6 +131,11 @@ def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
         raise e
 
 def get_meal_by_id(meal_id: int) -> Meal:
+
+    ##Gets meal by meal id from database
+    # Returns: Meal 
+    # Raises: Value error if meal with meal id has been deleted 2. Value error if Meal with Meal ID hasnt been found 3.Exception e if there is a database error
+    # Logs: Error if there has been a database error
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -138,6 +157,10 @@ def get_meal_by_id(meal_id: int) -> Meal:
 
 
 def get_meal_by_name(meal_name: str) -> Meal:
+    ##Gets meal by meal name from database
+    # Returns: Meal 
+    # Raises: Value error if meal with meal name has been deleted 2. Value error if Meal with Meal name hasnt been found 3.Exception e if there is a database error
+    # Logs: Error if there has been a database error
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -159,6 +182,10 @@ def get_meal_by_name(meal_name: str) -> Meal:
 
 
 def update_meal_stats(meal_id: int, result: str) -> None:
+    ##Updates meal name stats by meal id and result
+    # Returns: None 
+    # Raises: Value error if meal with meal ID has been deleted 2. Value error if Meal with Meal ID hasnt been found 3.Exception e if there is a database error 4. Value Error if result is not win or loss
+    # Logs: Error if there has been a database error
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
