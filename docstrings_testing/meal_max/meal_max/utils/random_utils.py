@@ -11,8 +11,15 @@ def get_random() -> float:
     """Fetch and returns a random float value generated from url provided
 
     Returns:
-        float: the random number requested
-    
+        float: the random number fetched from random.org
+
+    Raises:
+        RuntimeError: If the request to random.org fails or timed out
+        ValueError: If the response from random.org is invalid
+
+    Logs:
+        Error: if request to random.org timed out or failed
+
     """
     url = "https://www.random.org/decimal-fractions/?num=1&dec=2&col=1&format=plain&rnd=new"
 
