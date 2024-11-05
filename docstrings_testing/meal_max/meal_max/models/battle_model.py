@@ -17,6 +17,7 @@ class BattleModel:
 
     def battle(self) -> str:
         """Does battle between two meals, removes loser from combatant list
+        winner determined by difference between battle score of two means against a random number
 
         Returns:
             str: name of winning meal
@@ -88,7 +89,7 @@ class BattleModel:
         self.combatants.clear()
 
     def get_battle_score(self, combatant: Meal) -> float:
-        """gets the battle score of a meal
+        """calculates the battle score of a meal
 
         Args:
             combatant (Meal): name of meal trying to retrive data for
