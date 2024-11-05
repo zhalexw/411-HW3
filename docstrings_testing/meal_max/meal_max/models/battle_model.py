@@ -11,8 +11,16 @@ configure_logger(logger)
 
 
 class BattleModel:
+    """A class to manage battles between meals
+    
+    Attributes: 
+        combatants (List[Meal]): list of meal combatants currently enrolled
+    """
 
     def __init__(self):
+        """
+        Initializes BattleModel with empty combatant list (none enrolled)
+        """
         self.combatants: List[Meal] = []
 
     def battle(self) -> str:
