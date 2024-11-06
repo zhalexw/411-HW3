@@ -19,3 +19,59 @@ def sample_combatant2():
 @pytest.fixture
 def sample_combatant_list(sample_combatant1, sample_combatant2):
     return [sample_combatant1, sample_combatant2]
+
+#Unit tests for prep combatant
+def test_prep_combatant(battle_model, sample_combatant1):
+    """tests adding a meal to combatant list"""
+    battle_model.prep_combatant(sample_combatant1)
+    assert len(battle_model.combatants) == 1
+    assert battle_model.combatants[0].meal == 'sushi'
+
+def test_prep_combatant_full(battle_model, sample_combatant1):
+    """test error when combatant list full"""
+    battle_model.combatants.extend(sample_combatant_list)
+    assert len(battle_model.combatants) == 2
+
+    battle_model.prep_combatant(sample_combatant1)
+    with pytest.raises(ValueError, match="Combatant list is full, cannot add more combatants."):
+        battle_model.prep_combatant(sample_combatant1)
+
+
+#Unit tests for get combatants
+def test_get_combatants(battle_model):
+    """tests retrieving combatant list"""
+    battle_model.combatants.extend(sample_combatant_list)
+    combatants = battle_model.get_combatants()
+    assert len(combatants) == 2
+    assert combatants[0].meal == 'sushi'
+    assert combatants[1].meal == 'pizza'
+
+
+#Unit tests for get battle score
+def test_get_battle_score(battle_model, sample_combatant1):
+    """tests calculating battle score for sushi"""
+    ans = 29.6 #3.95*len("japanese")-2
+    assert battle_model.get_battle_score(sample_combatant1) == ans
+
+
+#Unit tests for clear combatants
+def test_clear_combatants(battle_model):
+    """tests clearing combatant list"""
+    battle_model.combatants.extend(sample_combatant_list)
+    assert len(battle_model.combatants) == 2
+
+    battle_model.clear_combatants()
+    assert len(battle_model.combatants) == 0
+
+
+#Unit tests for battle
+def test_battle(battle_model):
+    """tests doing battle between two meals"""
+    battle_model.combatants.extend(sample_combatant_list)
+    assert len(battle_model.combatants) == 2
+
+    winner = battle_model.battle()
+
+
+
+
