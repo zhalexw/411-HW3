@@ -71,6 +71,23 @@ def test_battle(battle_model):
     assert len(battle_model.combatants) == 2
 
     winner = battle_model.battle()
+    #check one combatant has been removed
+    assert len(battle_model.combatants) == 1
+    
+    #check that winner remains in combatant list
+    for i in battle_model.combatants:
+        if i != None:
+            assert i.meal == winner
+
+def test_battle_not_enough_combatants(battle_model):
+    """tests doing battle with not enough combatants"""
+    battle_model.combatants.append(sample_combatant1)
+    assert len(battle_model.combatants) == 1
+
+    battle_model.battle()
+    with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
+        battle_model.battle()
+    
 
 
 
