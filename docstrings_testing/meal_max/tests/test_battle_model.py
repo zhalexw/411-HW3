@@ -37,7 +37,7 @@ def test_prep_combatant_full(battle_model, sample_combatant1, sample_combatant_l
     battle_model.combatants.extend(sample_combatant_list)
     assert len(battle_model.combatants) == 2
 
-    battle_model.prep_combatant(sample_combatant1)
+    #battle_model.prep_combatant(sample_combatant1)
     with pytest.raises(ValueError, match="Combatant list is full, cannot add more combatants."):
         battle_model.prep_combatant(sample_combatant1)
 
@@ -79,15 +79,16 @@ def test_battle(battle_model, mocker, sample_combatant_list):
     mock_random = mocker.patch("meal_max.utils.random_utils.get_random", return_value=0.39)
 
     winner = battle_model.battle()
-    expected_winner = Meal(1, 'sushi', 'japanese', 3.95, 'MED')
-    expected_loser = Meal(2, 'pizza', 'italian', 24.95, 'LOW')
+    expected_winner = 'sushi'
+
+    mock_random.assert_called_once_with()
 
     #check winner is correct
-    assert winner == expected_winner
+    assert winner == expected_winner, f"Expected {expected_winner}, got {winner}"
 
     #check loser has been removed and winner stays
-    assert expected_winner in battle_model.combatants
-    assert expected_loser not in battle_model.combatants
+    assert battle_model.combatants[0].meal == 'sushi'
+    assert len(battle_model.combatants) == 1
 
 
 def test_battle_not_enough_combatants(battle_model, sample_combatant1):
@@ -95,7 +96,7 @@ def test_battle_not_enough_combatants(battle_model, sample_combatant1):
     battle_model.prep_combatant(sample_combatant1)
     assert len(battle_model.combatants) == 1
 
-    battle_model.battle()
+    #battle_model.battle()
     with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
         battle_model.battle()
     
