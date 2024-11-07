@@ -9,6 +9,11 @@ def battle_model():
     return BattleModel()
 
 @pytest.fixture
+def mock_random_float(mocker):
+    """Mock getting random number for battle"""
+    return mocker.patch("meal_max.utils.random_utils.get_random")
+
+@pytest.fixture
 def sample_combatant1():
     return Meal(1, 'sushi', 'japanese', 3.95, 'MED')
 
@@ -51,6 +56,7 @@ def test_get_combatants(battle_model):
 def test_get_battle_score(battle_model, sample_combatant1):
     """tests calculating battle score for sushi"""
     ans = 29.6 #3.95*len("japanese")-2
+    #24.95*len("italian")-3 = 171.65
     assert battle_model.get_battle_score(sample_combatant1) == ans
 
 
@@ -65,25 +71,28 @@ def test_clear_combatants(battle_model):
 
 
 #Unit tests for battle
-def test_battle(battle_model):
+def test_battle(battle_model, mocker):
     """tests doing battle between two meals"""
     battle_model.combatants.extend(sample_combatant_list)
     assert len(battle_model.combatants) == 2
 
-    winner = battle_model.battle()
-    #check one combatant has been removed
-    assert len(battle_model.combatants) == 1
-    
-    #check that winner remains in combatant list
-    for i in battle_model.combatants:
-        if i != None:
-            assert i.meal == winner
+    mock_random = mocker.patch("meal_max.utils.random_utils.get_random", return_value=0.39)
 
-#mock random number from mocker
+    winner = battle_model.battle()
+    expected_winner = Meal(1, 'sushi', 'japanese', 3.95, 'MED')
+    expected_loser = Meal(2, 'pizza', 'italian', 24.95, 'LOW')
+
+    #check winner is correct
+    assert winner == expected_winner
+
+    #check loser has been removed and winner stays
+    assert expected_winner in battle_model.combatants
+    assert expected_loser not in battle_model.combatants
+
 
 def test_battle_not_enough_combatants(battle_model):
     """tests doing battle with not enough combatants"""
-    battle_model.combatants.append(sample_combatant1)
+    battle_model.prep_combatant(sample_combatant1)
     assert len(battle_model.combatants) == 1
 
     battle_model.battle()

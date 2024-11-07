@@ -1,12 +1,7 @@
 import pytest 
 
-from meal_max.models.kitchen_model import KitchenModel
 from meal_max.models.kitchen_model import Meal
 
-@pytest.fixture()
-def kitchen_model():
-    """Fixture to provide a new instance of KitchenModel for each test."""
-    return KitchenModel()
 
 @pytest.fixture
 def sample_meal1():
