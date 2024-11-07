@@ -79,6 +79,8 @@ def test_battle(battle_model):
         if i != None:
             assert i.meal == winner
 
+#mock random number from mocker
+
 def test_battle_not_enough_combatants(battle_model):
     """tests doing battle with not enough combatants"""
     battle_model.combatants.append(sample_combatant1)

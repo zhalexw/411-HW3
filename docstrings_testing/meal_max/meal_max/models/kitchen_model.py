@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+import os
 import sqlite3
 from typing import Any
 
@@ -119,13 +120,15 @@ def delete_meal(meal_id: int) -> None:
 
 def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
 
-     """ gets the leaderboard and sorts them by wins
+    """ gets the leaderboard and sorts them by wins
     Returns: 
         A dictionary
     Raises: 
         1. Value error if the sort by parameter is invalid 2. Exception e if there is a database error
     Logs: 
-        1. Error if there is an invalid sort by parameter 2. Error if there is a database error """
+        1. Error if there is an invalid sort by parameter 2. Error if there is a database error 
+    """
+     
     query = """
         SELECT id, meal, cuisine, price, difficulty, battles, wins, (wins * 1.0 / battles) AS win_pct
         FROM meals WHERE deleted = false AND battles > 0
@@ -168,7 +171,7 @@ def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
 
 def get_meal_by_id(meal_id: int) -> Meal:
 
-   """ 
+    """ 
     Gets meal by meal id from database
      Returns: 
        Meal 
@@ -201,7 +204,7 @@ def get_meal_by_id(meal_id: int) -> Meal:
 
 
 def get_meal_by_name(meal_name: str) -> Meal:
-   """Gets meal by meal name from database
+    """Gets meal by meal name from database
 
      Returns: 
         Meal 
@@ -231,7 +234,7 @@ def get_meal_by_name(meal_name: str) -> Meal:
 
 
 def update_meal_stats(meal_id: int, result: str) -> None:
-   """
+    """
         Updates meal name stats by meal id and result
     Returns: 
         None 
