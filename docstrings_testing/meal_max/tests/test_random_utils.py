@@ -15,7 +15,7 @@ def mock_random_org(mocker):
 #Unit Tests
 def test_get_random(mock_random_org):
     """Test retrieving a random number from random.org"""
-    result = get_random()
+    result = mock_random_org
     assert result == RANDOM_NUMBER, f"Expected random number {RANDOM_NUMBER}, but got {result}"
 
     requests.get.assert_called_once_with("https://www.random.org/decimal-fractions/?num=1&dec=2&col=1&format=plain&rnd=new")

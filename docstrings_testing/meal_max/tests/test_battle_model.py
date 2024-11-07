@@ -37,19 +37,19 @@ def test_prep_combatant_full(battle_model, sample_combatant1, sample_combatant_l
     battle_model.combatants.extend(sample_combatant_list)
     assert len(battle_model.combatants) == 2
 
-    #battle_model.prep_combatant(sample_combatant1)
+    battle_model.prep_combatant(sample_combatant1)
     with pytest.raises(ValueError, match="Combatant list is full, cannot add more combatants."):
-        battle_model.prep_combatant(sample_combatant2)
+        battle_model.prep_combatant(sample_combatant1)
 
 
 #Unit tests for get combatants
-def test_get_combatants(battle_model):
+def test_get_combatants(battle_model, sample_combatant_list):
     """tests retrieving combatant list"""
     battle_model.combatants.extend(sample_combatant_list)
     combatants = battle_model.get_combatants()
     assert len(combatants) == 2
-    assert combatants[0] == sample_combatant1
-    assert combatants[1] == sample_combatant2
+    assert combatants[0].meal == 'sushi'
+    assert combatants[1].meal == 'pizza'
 
 
 #Unit tests for get battle score
@@ -61,7 +61,7 @@ def test_get_battle_score(battle_model, sample_combatant1):
 
 
 #Unit tests for clear combatants
-def test_clear_combatants(battle_model):
+def test_clear_combatants(battle_model, sample_combatant_list):
     """tests clearing combatant list"""
     battle_model.combatants.extend(sample_combatant_list)
     assert len(battle_model.combatants) == 2
@@ -71,7 +71,7 @@ def test_clear_combatants(battle_model):
 
 
 #Unit tests for battle
-def test_battle(battle_model, mocker):
+def test_battle(battle_model, mocker, sample_combatant_list):
     """tests doing battle between two meals"""
     battle_model.combatants.extend(sample_combatant_list)
     assert len(battle_model.combatants) == 2
@@ -90,7 +90,7 @@ def test_battle(battle_model, mocker):
     assert expected_loser not in battle_model.combatants
 
 
-def test_battle_not_enough_combatants(battle_model):
+def test_battle_not_enough_combatants(battle_model, sample_combatant1):
     """tests doing battle with not enough combatants"""
     battle_model.prep_combatant(sample_combatant1)
     assert len(battle_model.combatants) == 1
