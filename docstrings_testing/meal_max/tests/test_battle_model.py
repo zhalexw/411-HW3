@@ -1,4 +1,7 @@
 import pytest
+import re
+import sqlite3
+from contextlib import contextmanager
 
 from meal_max.models.battle_model import BattleModel
 from meal_max.models.kitchen_model import Meal
@@ -24,6 +27,29 @@ def sample_combatant2():
 @pytest.fixture
 def sample_combatant_list(sample_combatant1, sample_combatant2):
     return [sample_combatant1, sample_combatant2]
+
+@pytest.fixture
+def mock_cursor(mocker):
+    mock_conn = mocker.Mock()
+    mock_cursor = mocker.Mock()
+
+    # Mock the connection's cursor
+    mock_conn.cursor.return_value = mock_cursor
+    mock_cursor.fetchone.return_value = None  # Default return for queries
+    mock_cursor.fetchall.return_value = []
+    mock_cursor.commit.return_value = None
+
+    # Mock the get_db_connection context manager from sql_utils
+    @contextmanager
+    def mock_get_db_connection():
+        yield mock_conn  # Yield the mocked connection object
+
+    mocker.patch("meal_max.models.kitchen_model.get_db_connection", mock_get_db_connection)
+
+    return mock_cursor  # Return the mock cursor so we can set expectations per test
+
+def normalize_whitespace(sql_query: str) -> str:
+    return re.sub(r'\s+', ' ', sql_query).strip()
 
 #Unit tests for prep combatant
 def test_prep_combatant(battle_model, sample_combatant1):
@@ -76,15 +102,15 @@ def test_battle(battle_model, mocker, sample_combatant_list):
     battle_model.combatants.extend(sample_combatant_list)
     assert len(battle_model.combatants) == 2
 
+    mocker.patch.object(battle_model, "get_battle_score", side_effect=[29.6, 171.65])
     mock_random = mocker.patch("meal_max.utils.random_utils.get_random", return_value=0.39)
+    mock_update_meal_stats = mocker.patch("meal_max.models.battle_model.update_meal_stats")
 
-    winner = battle_model.battle()
-    expected_winner = 'sushi'
 
-    mock_random.assert_called_once_with()
+    assert battle_model.battle() == 'sushi'
 
-    #check winner is correct
-    assert winner == expected_winner, f"Expected {expected_winner}, got {winner}"
+    mock_update_meal_stats.assert_any_call(1, 'win')
+    mock_update_meal_stats.assert_any_call(2, 'loss')
 
     #check loser has been removed and winner stays
     assert battle_model.combatants[0].meal == 'sushi'
