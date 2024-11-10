@@ -31,6 +31,10 @@ def sample_meal2():
     return Meal(2, 'salmon', 'norwegian', 27.3, 'LOW')
 
 @pytest.fixture
+def sample_meal3():
+    return Meal(3, 'omlette', 'french', 12.1, 'MED')
+
+@pytest.fixture
 def sample_meals(sample_meal1, sample_meal2):
     return [sample_meal1, sample_meal2]
 
@@ -108,13 +112,7 @@ def test_create_meal_invalid_difficulty():
     with pytest.raises(ValueError, match="Invalid difficulty level: EZ. Must be 'LOW', 'MED', or 'HIGH'."):
          create_meal(meal ='steak', cuisine = 'american', price = 33.3, difficulty ="EZ")
 
-##Clear Meal IDK HOW TO DO THIS
-
-##def test_clear_meals(meal, sample_meal1):
-    ##"Test clearing entire meals table" 
-
-    
-    
+  
 
 
 ##Delete Meal 
@@ -170,8 +168,6 @@ def test_delete_meal_already_deleted(mock_cursor):
     with pytest.raises(ValueError, match="Meal with ID 999 has been deleted"):
         delete_meal(999)
 
-
-## Get Leaderboard not sure
 
  
 ## Get meal by id
@@ -246,6 +242,20 @@ def test_get_meal_by_bad_name(mock_cursor):
     with pytest.raises(ValueError, match="Meal with name invalid not found"):
         get_meal_by_name("invalid")
 
+##Help with thsi
+def test_get_meal_already_deleted(mock_cursor):
+    """Test error when trying to get a meal that's already marked as deleted."""
+
+
+
+    # Simulate that the meal exists but is already marked as deleted
+    mock_cursor.fetchone.return_value = (1, 'steak', 'american', 33.3, 'MED', True)
+
+    # Expect a ValueError when attempting to delete a meal that's already been deleted
+    with pytest.raises(ValueError, match="Meal with name steak has been deleted"):
+        get_meal_by_name("steak")
+
+
 ## update meal stats
 
 def test_update_meal_stats(mock_cursor):
@@ -291,19 +301,85 @@ def test_update_meal_stats_deleted_id(mock_cursor):
     # Ensure that no SQL query for updating play count was executed
     mock_cursor.execute.assert_called_once_with("SELECT deleted FROM meals WHERE id = ?", (1,))
 
-##Figure this out !!!
-    #bad id
-    #invalid result
+
 def test_update_meal_stats_bad_id(mock_cursor):
     """Test error when trying to update stats for a bad meal id."""
-    mock_cursor.fetchone.return_value = [True]
+    mock_cursor.fetchone.return_value = None
     # Expect a ValueError when attempting to update a deleted song
     with pytest.raises(ValueError, match="Meal with ID 800 not found"):
         update_meal_stats(800, "win")
 
-    # Ensure that no SQL query for updating play count was executed
-    mock_cursor.execute.assert_called_once_with("SELECT bad FROM meals WHERE id = ?", (800,))
+def test_update_meal_stats_invalid_result(mock_cursor):
+    mock_cursor.fetchone.return_value = ([False])
+    with pytest.raises(ValueError, match="Invalid result: draw. Expected 'win' or 'loss'."):
+        update_meal_stats(1, 'draw')
+    
+
 
 #Figure out leaderboard
     ##bad sort parameetr 
     #leaderboard
+
+## Help with this 
+def test_get_leaderboard(mock_cursor):
+    """Test retrieving all meals ordered by wins."""
+
+    # Simulate that there are multiple songs in the database
+    mock_cursor.fetchall.return_value = [
+        (2, 'salmon', 'norwegian', 27.3, 'LOW',100, 80, 0.8),
+        (1, 'steak', 'american', 33.3, 'MED',100,  50, 0.5),
+        (3, 'omlette', 'french', 12.1, 'MED',100, 30, 0.3)
+    ]
+
+    # Call the get_all_songs function with sort_by_play_count = True
+    leaderboard = get_leaderboard()
+
+    # Ensure the results are sorted by play count
+    expected_result = [
+        {"id": 2, "meal": "salmon", "cuisine": "norwegian", "price": 27.3, "difficulty": "LOW", "battles": 100, "wins": 80, "win_pct":80.0},
+        {"id": 1, "meal": "steak", "cuisine": "american", "price": 33.3, "difficulty": "MED", "battles": 100, "wins": 50, "win_pct":50.0},
+        {"id": 3, "meal": "omlette", "cuisine": "french", "price": 12.1, "difficulty": "MED", "battles": 100, "wins": 30, "win_pct":30.0}
+    ]
+
+    assert leaderboard == expected_result, f"Expected {expected_result}, but got {leaderboard}"
+
+def test_get_leaderboard_sort_by_win_pct(mock_cursor):
+    """Test retrieving all meals ordered by wins pct."""
+
+    # Simulate that there are multiple songs in the database
+    mock_cursor.fetchall.return_value = [
+        (2, 'salmon', 'norwegian', 27.3, 'LOW',100, 80, 0.8),
+        (1, 'steak', 'american', 33.3, 'MED',100,  50, 0.5),
+        (3, 'omlette', 'french', 12.1, 'MED',100, 30, 0.3)
+    ]
+
+    # Call the get_all_songs function with sort_by_play_count = True
+    leaderboard = get_leaderboard(sort_by = "win_pct")
+
+    # Ensure the results are sorted by play count
+    expected_result = [
+        {"id": 2, "meal": "salmon", "cuisine": "norwegian", "price": 27.3, "difficulty": "LOW", "battles": 100, "wins": 80, "win_pct":80.0},
+        {"id": 1, "meal": "steak", "cuisine": "american", "price": 33.3, "difficulty": "MED", "battles": 100, "wins": 50, "win_pct":50.0},
+        {"id": 3, "meal": "omlette", "cuisine": "french", "price": 12.1, "difficulty": "MED", "battles": 100, "wins": 30, "win_pct":30.0}
+    ]
+
+    assert leaderboard == expected_result, f"Expected {expected_result}, but got {leaderboard}"
+
+def test_get_leaderboard_sort_by_badt(mock_cursor):
+    """Test retrieving all meals ordered by bad sort by."""
+
+    # Simulate that there are multiple songs in the database
+    mock_cursor.fetchall.return_value = [
+        (2, 'salmon', 'norwegian', 27.3, 'LOW',100, 80, 0.8),
+        (1, 'steak', 'american', 33.3, 'MED',100,  50, 0.5),
+        (3, 'omlette', 'french', 12.1, 'MED',100, 30, 0.3)
+    ]
+
+    # Call the get_all_songs function with sort_by_play_count = True
+
+    # Ensure the results are sorted by play count
+    # expected_result = ("Invalid sort_by parameter: meal")
+
+    # assert leaderboard == expected_result, f"Expected {expected_result}, but got {leaderboard}"
+    with pytest.raises(ValueError, match="Invalid sort_by parameter: meal"):
+         get_leaderboard(sort_by = "meal")
